@@ -1,4 +1,7 @@
 const noble = require('noble');
+const {
+  extractEulerComponents,
+} = require('./util');
 
 /*
 https://nordicsemiconductor.github.io/Nordic-Thingy52-FW/documentation/firmware_architecture.html#arch_motion
@@ -54,47 +57,7 @@ noble.on('discover', function(peripheral) {
   })
 })
 
-const swapEndianness = (val) => (
-   ((val & 0xFF) << 24)
-    | ((val & 0xFF00) << 8)
-    | ((val >> 8) & 0xFF00)
-    | ((val >> 24) & 0xFF)
-);
 
-const bytesToInt32 = (bytes) => {
-  var buf = new ArrayBuffer(4);
-  // Create a data view of it
-  var view = new DataView(buf);
-
-  // set bytes
-  bytes.forEach(function (b, i) {
-      view.setUint8(i, b);
-  });
-
-  // Read the bits as a float; note that by doing this, we're implicitly
-  // converting it from a 32-bit float into JavaScript's native 64-bit double
-  var num = view.getInt32(0);
-  return num;
-};
-
-const int32ToAngles = val => (
-  
-)
-
-const extractEulerComponents = (eulerBytes) => {
-  /*
-  Attitude represented in Euler angles (16Q16 fixed point)
-  int32_t - roll [degrees]
-  int32_t - pitch [degrees]
-  int32_t - yaw [degrees]
-  */
-  // let roll = new Uint32Array(eulerBytes.slice(0, 4))[0];
-  const roll = swapEndianness(bytesToInt32(eulerBytes.slice(0, 4)));
-  const pitch = bytesToFloat(eulerBytes.slice(4, 8));
-  const yaw = eulerBytes.slice(8, 12);
-  // return { roll, pitch, yaw }
-  return roll;
-};
 
 const captureEulerAngles = () => {
   // configCharacteristic.write()
