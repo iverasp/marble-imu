@@ -10,6 +10,8 @@
   "license": "ISC",
   "dependencies": {
     "noble": "^1.9.1",
+    "osc": "^2.2.4",
+    "ws": "^6.2.0",
     "xpc-connection": "git://github.com/taoyuan/node-xpc-connection.git"
   }
 }

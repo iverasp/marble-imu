@@ -1,4 +1,5 @@
 const noble = require('noble');
+const WebSocket = require('ws');
 const {
   extractEulerComponents,
 } = require('./util');
@@ -13,6 +14,8 @@ const MOTION_EULER_CHARACTERISTIC_UUID = 'EF680407-9B35-4933-9B10-52FFA9740042'.
 
 let configCharacteristic = null;
 let eulerCharacteristic = null;
+
+const wss = new WebSocket.Server({ port: 8080 });
 
 noble.on('stateChange', function(state) {
   if (state === 'poweredOn') {
@@ -64,7 +67,15 @@ const captureEulerAngles = () => {
   eulerCharacteristic.subscribe((error) => {
     if (!error) {
       eulerCharacteristic.on('read', (data, isNotification) => {
-        console.log(extractEulerComponents(data));
+        eulerAngles = extractEulerComponents(data);
+        console.log(eulerAngles);
+        wss.clients.forEach((ws) => {
+          try {
+            ws.send(JSON.stringify(eulerAngles));
+          } catch (error) {
+            console.log(error);
+          }
+        })
       })
     }
   })
