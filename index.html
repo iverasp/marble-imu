@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html" charset="utf-8"/>
+    <title>Babylon - Getting Started</title>
+    <!--- Link to the last version of BabylonJS --->
+    <script src="https://cdn.babylonjs.com/babylon.js"></script>
+    <style>
+        html, body {
+            overflow: hidden;
+            width   : 100%;
+            height  : 100%;
+            margin  : 0;
+            padding : 0;
+        }
+
+        #renderCanvas {
+            width   : 100%;
+            height  : 100%;
+            touch-action: none;
+        }
+    </style>
+</head>
+<body>
+    <canvas id="renderCanvas"></canvas>
+    <script>
+        window.addEventListener('DOMContentLoaded', function(){
+            var canvas = document.getElementById('renderCanvas');
+            const socket = new WebSocket('ws://192.168.1.205:8080');
+            let box;
+
+            socket.addEventListener('message', function (event) {
+                if (box) {
+                  const eulerAngles = JSON.parse(event.data);
+                  console.log(eulerAngles);
+                  box.rotation = new BABYLON.Vector3(
+                    ((2 * Math.PI) / 360) * eulerAngles.pitch,
+                    0, // ((2 * Math.PI) / 360) * eulerAngles.yaw,
+                    ((2 * Math.PI) / 360) * eulerAngles.roll,
+                  );
+                }
+            });
+
+            var engine = new BABYLON.Engine(canvas, true);
+
+            var createScene = function () {
+
+              // Create the scene space
+              var scene = new BABYLON.Scene(engine);
+
+              // Add a camera to the scene and attach it to the canvas
+              var camera = new BABYLON.ArcRotateCamera("Camera", 3 * Math.PI / 4, Math.PI / 4, 4, BABYLON.Vector3.Zero(), scene);
+              camera.attachControl(canvas, true);
+
+              // Add lights to the scene
+              var light1 = new BABYLON.HemisphericLight("light1", new BABYLON.Vector3(1, 1, 0), scene);
+              var light2 = new BABYLON.PointLight("light2", new BABYLON.Vector3(0, 1, -1), scene);
+
+              var faceColors = [];
+              faceColors[0] = BABYLON.Color3.Blue();
+              faceColors[1] = BABYLON.Color3.Red();
+              faceColors[2] = BABYLON.Color3.Green();
+              faceColors[3] = BABYLON.Color3.White();
+              faceColors[4] = BABYLON.Color3.Yellow();
+              faceColors[5] = BABYLON.Color3.Black();
+              box = BABYLON.MeshBuilder.CreateBox("box", { height: 0.25, width: 1, depth: 1, faceColors }, scene);
+
+              return scene;
+
+            };
+
+            // call the createScene function
+            var scene = createScene();
+
+            // run the render loop
+            engine.runRenderLoop(function(){
+                scene.render();
+            });
+
+            // the canvas/window resize event handler
+            window.addEventListener('resize', function(){
+                engine.resize();
+            });
+        });
+    </script>
+</body>
+</html>
